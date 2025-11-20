@@ -1,0 +1,78 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: clearit_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: clearit_db
+      MYSQL_USER: clearit_user
+      MYSQL_PASSWORD: clearit_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - clearit_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # PHP-FPM Service (using pre-built image)
+  php:
+    image: php:8.2-fpm
+    container_name: clearit_php
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      - ./docker/setup-laravel.sh:/setup-laravel.sh
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=clearit_db
+      - DB_USERNAME=clearit_user
+      - DB_PASSWORD=clearit_password
+    depends_on:
+      - mysql
+    networks:
+      - clearit_network
+    entrypoint: ["bash", "/setup-laravel.sh"]
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: clearit_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    networks:
+      - clearit_network
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: clearit_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - clearit_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  clearit_network:
+    driver: bridge

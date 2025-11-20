@@ -115,8 +115,9 @@ ClearitExam/
 - PHP 8.2+
 - Composer
 - Node.js & NPM (for asset compilation)
+- **OR Docker & Docker Compose** (for containerized setup)
 
-### Installation Steps
+### Local Installation Steps
 
 1. **Clone Repository**
    ```bash
@@ -156,6 +157,24 @@ ClearitExam/
    ```bash
    php artisan serve
    ```
+
+### Docker Installation (Recommended)
+
+For a complete containerized setup, see [DOCKER_SETUP.md](DOCKER_SETUP.md) for detailed instructions.
+
+#### Quick Docker Start
+```bash
+# Simple development setup
+docker compose -f docker-compose.simple.yml up -d
+
+# Access application at http://localhost:8080
+# phpMyAdmin at http://localhost:8081
+```
+
+#### Docker Services
+- **Application**: http://localhost:8080
+- **MySQL**: localhost:3307 (to avoid XAMPP conflicts)
+- **phpMyAdmin**: http://localhost:8081
 
 ## Key Features Demonstrated
 

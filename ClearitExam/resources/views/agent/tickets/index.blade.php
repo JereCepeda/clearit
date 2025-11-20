@@ -109,36 +109,4 @@
         </div>
     </div>
 </div>
-
-    @foreach($myTickets as $ticket)
-    <div class="modal fade" id="requestDocsModal{{ $ticket->id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">Solicitar Documentos - Ticket #{{ $ticket->id }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{{ route('agent.tickets.request-documents', $ticket->id) }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="requested_documents{{ $ticket->id }}" class="form-label">Documentos Requeridos:</label>
-                            <textarea class="form-control" id="requested_documents{{ $ticket->id }}" name="requested_documents" rows="3" required 
-                                    placeholder="Especifica qué documentos necesitas..."></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="agent_comments{{ $ticket->id }}" class="form-label">Comentarios Adicionales:</label>
-                            <textarea class="form-control" id="agent_comments{{ $ticket->id }}" name="agent_comments" rows="2" 
-                                    placeholder="Comentarios opcionales..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">Solicitar Documentos</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    @endforeach
 @endsection

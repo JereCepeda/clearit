@@ -27,8 +27,17 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>
-                    <li><a class="dropdown-item" href="{{ route('customer.tickets.index') }}">Tickets</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    @if(Auth::user()->hasRole('admin'))
+                        <li><a class="dropdown-item" href="{{ route('admin.users.index') }}">User Management</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.tickets.index') }}">All Tickets</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    @elseif(Auth::user()->hasRole('user'))
+                        <li><a class="dropdown-item" href="{{ route('customer.tickets.index') }}">Tickets</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    @elseif(Auth::user()->hasRole('agent'))
+                        <li><a class="dropdown-item" href="{{ route('agent.tickets.index') }}">Assigned Tickets</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    @endif
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

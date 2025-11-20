@@ -29,6 +29,30 @@ class Ticket extends Model
         'documents_requested_at' => 'datetime',
     ];
 
+    // Accessor to ensure pending_documents is always an array
+    public function getPendingDocumentsAttribute($value)
+    {
+        if (is_null($value)) {
+            return [];
+        }
+        
+        if (is_string($value)) {
+            // Try to decode JSON string
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return is_array($decoded) ? $decoded : [];
+            }
+            // If not valid JSON, return empty array
+            return [];
+        }
+        
+        if (is_array($value)) {
+            return $value;
+        }
+        
+        return [];
+    }
+
     // Relaciones
     public function creator()
     {

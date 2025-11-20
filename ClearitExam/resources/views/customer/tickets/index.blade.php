@@ -127,11 +127,17 @@
                                     </div>
                                 </div>
                                 
-                                @if($ticket->pending_documents && count($ticket->pending_documents) > 0)
+                                @if($ticket->pending_documents && is_array($ticket->pending_documents) && count($ticket->pending_documents) > 0)
                                     @foreach($ticket->pending_documents as $doc)
-                                        <div class="alert alert-warning mt-2">
-                                            <i class="bi bi-exclamation-triangle me-2"></i>{{ $doc['original_name']  }}
-                                        </div>
+                                        @if(is_array($doc) && isset($doc['original_name']))
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>{{ $doc['original_name'] }}
+                                            </div>
+                                        @elseif(is_string($doc))
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>{{ $doc }}
+                                            </div>
+                                        @endif
                                     @endforeach
                                 @endif
                             </div>

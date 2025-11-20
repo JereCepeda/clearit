@@ -20,11 +20,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'role:user'])->prefix('customer')->name('customer.tickets.')->group(function () {
+Route::middleware(['auth', 'role:user'])->prefix('customer/tickets')->name('customer.tickets.')->group(function () {
     Route::get('/', [CustomertTicketController::class, 'index'])->name('index');
     Route::get('/create', [CustomertTicketController::class, 'create'])->name('create');
     Route::post('/', [CustomertTicketController::class, 'store'])->name('store');
-    Route::get('/{ticket}', [CustomertTicketController::class, 'show'])->name('show');
     Route::patch('/{ticket}', [CustomertTicketController::class, 'update'])->name('update');
     Route::delete('/{ticket}', [CustomertTicketController::class, 'destroy'])->name('destroy');
 });

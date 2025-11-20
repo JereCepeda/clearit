@@ -1,8 +1,51 @@
-<div class="modal fade" id="ticketModal{{ $ticket->id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<!-- Document Request Modals for Agent -->
+@if(auth()->user()->hasRole('agent') || auth()->user()->hasRole('admin'))
+    @php
+        $agentTickets = collect();
+        if(isset($myTickets)) {
+            $agentTickets = $agentTickets->merge($myTickets);
+        }
+        if(isset($newTickets)) {
+            $agentTickets = $agentTickets->merge($newTickets);
+        }
+    @endphp
+    
+    @foreach($agentTickets->unique('id') as $agentTicket)
+        @if($agentTicket->assigned_agent_id === auth()->id() && $agentTicket->status === 'in_progress')
+        <div class="modal fade" id="requestDocsModal{{ $agentTicket->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">Solicitar Documentos - Ticket #{{ $agentTicket->id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ route('agent.tickets.request-documents', $agentTicket->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="requested_documents{{ $agentTicket->id }}" class="form-label">Documentos Requeridos:</label>
+                                <textarea class="form-control" id="requested_documents{{ $agentTicket->id }}" name="requested_documents" rows="3" required 
+                                          placeholder="Especifica qué documentos necesitas que suba el cliente..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-warning"><i class="bi bi-send me-1"></i>Solicitar Documentos</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
+@endif
+
+<!-- Ticket Detail Modal -->
+<div class="modal fade" id="ticketModal{{ $ticket->id }}" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel{{ $ticket->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="ticketModalLabel{{ $ticket->id }}">
                     <i class="bi bi-file-text me-2"></i>Ticket #{{ $ticket->id }} - {{ $ticket->name }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -88,22 +131,28 @@
                     </div>
                 @endif
 
-                @if($ticket->pending_documents && count($ticket->pending_documents) > 0)
+                @if($ticket->pending_documents && is_array($ticket->pending_documents) && count($ticket->pending_documents) > 0)
                     <div class="row mb-3">
                         <div class="col-12">
                             <strong><i class="bi bi-file-earmark me-1"></i>Documentos Adjuntos:</strong>
                             <div class="mt-2">
                                 @foreach($ticket->pending_documents as $index => $doc)
-                                    <div class="d-flex justify-content-between align-items-center border p-2 mb-2 rounded">
-                                        <span><i class="bi bi-file-earmark me-1"></i>{{ $doc['original_name'] }}</span>
-                                        <div>
-                                            @hasrole('agent|admin')
-                                                <a href="{{ route('agent.tickets.download', ['ticket' => $ticket->id, 'document' => $index]) }}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-download me-1"></i>Descargar
-                                                </a>
-                                            @endhasrole
+                                    @if(is_array($doc) && isset($doc['original_name']))
+                                        <div class="d-flex justify-content-between align-items-center border p-2 mb-2 rounded">
+                                            <span><i class="bi bi-file-earmark me-1"></i>{{ $doc['original_name'] }}</span>
+                                            <div>
+                                                @hasrole('agent|admin')
+                                                    <a href="{{ route('agent.tickets.download', ['ticket' => $ticket->id, 'document' => $index]) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-download me-1"></i>Descargar
+                                                    </a>
+                                                @endhasrole
+                                            </div>
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="d-flex justify-content-between align-items-center border p-2 mb-2 rounded bg-light">
+                                            <span><i class="bi bi-exclamation-triangle text-warning me-1"></i>Document format error: {{ is_string($doc) ? $doc : 'Unknown format' }}</span>
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -219,29 +268,49 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
-function toggleEditMode(ticketId) {
-    const viewMode = document.getElementById('viewMode' + ticketId);
-    const editMode = document.getElementById('editMode' + ticketId);
-    const viewButtons = document.getElementById('viewButtons' + ticketId);
-    const editButtons = document.getElementById('editButtons' + ticketId);
-    
-    if (viewMode.style.display === 'none') {
-        // Mostrar vista, ocultar edición
-        viewMode.style.display = 'block';
-        editMode.style.display = 'none';
-        viewButtons.style.display = 'block';
-        editButtons.style.display = 'none';
-    } else {
-        // Mostrar edición, ocultar vista
-        viewMode.style.display = 'none';
-        editMode.style.display = 'block';
-        viewButtons.style.display = 'none';
-        editButtons.style.display = 'block';
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if modal exists
+    const modal = document.getElementById('ticketModal{{ $ticket->id }}');
+    if (modal) {
+        // Add event listeners to debug modal events if needed
+        modal.addEventListener('show.bs.modal', function (event) {
+            console.log('Modal {{ $ticket->id }} opening');
+        });
     }
+});
+
+if (typeof window.toggleEditMode === 'undefined') {
+    window.toggleEditMode = function(ticketId) {
+        const viewMode = document.getElementById('viewMode' + ticketId);
+        const editMode = document.getElementById('editMode' + ticketId);
+        const viewButtons = document.getElementById('viewButtons' + ticketId);
+        const editButtons = document.getElementById('editButtons' + ticketId);
+        
+        if (viewMode && editMode && viewButtons && editButtons) {
+            if (viewMode.style.display === 'none') {
+                viewMode.style.display = 'block';
+                editMode.style.display = 'none';
+                viewButtons.style.display = 'block';
+                editButtons.style.display = 'none';
+            } else {
+                viewMode.style.display = 'none';
+                editMode.style.display = 'block';
+                viewButtons.style.display = 'none';
+                editButtons.style.display = 'block';
+            }
+        }
+    };
 }
 
-function submitEditForm(ticketId) {
-    document.getElementById('editForm' + ticketId).submit();
+if (typeof window.submitEditForm === 'undefined') {
+    window.submitEditForm = function(ticketId) {
+        const form = document.getElementById('editForm' + ticketId);
+        if (form) {
+            form.submit();
+        }
+    };
 }
 </script>
+@endpush

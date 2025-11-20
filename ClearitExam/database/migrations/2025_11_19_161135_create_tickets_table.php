@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('country');
             $table->enum('status',['new','in_progress','completed'])->default('new');
             $table->string('transported_product');
-            $table->string('comments')->nullable();
+            $table->string('comments', 4000)->nullable();
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('assigned_agent_id')->nullable()->constrained('users')->onDelete('set null');
             $table->json('pending_documents')->nullable();

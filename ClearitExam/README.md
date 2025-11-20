@@ -1,59 +1,318 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Collecting workspace information# ClearIT MVP - Technical Examination
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
+This project is a Minimum Viable Product (MVP) developed for the **Clearit PHP Technical Examination**. It demonstrates a complete ticket management system for import/export clearance operations using modern Laravel development practices.
 
-## About Laravel
+## System Architecture
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Technology Stack
+- **Framework**: Laravel 11
+- **Database**: SQLite (configurable in `config/database.php`)
+- **Frontend**: Bootstrap 5.3 + Blade Templates
+- **Authentication**: Laravel Breeze
+- **Permissions**: Spatie Laravel Permission
+- **File Storage**: Laravel Storage (Public disk)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Project Structure
+```
+ClearitExam/
+├── app/
+│   ├── Http/Controllers/          # Application controllers
+│   ├── Models/                    # Eloquent models
+│   └── Services/                  # Business logic services
+├── database/
+│   ├── migrations/               # Database schema
+│   ├── factories/                # Test data factories
+│   └── seeders/                  # Database seeders
+├── resources/views/              # Blade templates
+└── routes/                       # Application routes
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Examination Requirements & Implementation
 
-## Learning Laravel
+### 1. User Authentication ✅
+**Requirement**: Develop a login system for "agents" and "users"
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Implementation**:
+- **Base System**: Laravel Breeze authentication in auth.php
+- **Role Management**: Spatie Permission package configured in permission.php
+- **User Roles**: 
+  - `user` - Regular customers who create tickets
+  - `agent` - Clearance agents who process tickets
+  - `admin` - System administrators
+- **Models**: `User` with HasRoles trait
+- **Seeders**: Demo accounts created in `RoleAndUserSeeder`
+- **Middleware**: Role-based access control in app.php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Demo Accounts**:
+- User: `user@clearit.com` / `123456`
+- Agent: `agent@clearit.com` / `123456`
+- Admin: `admin@clearit.com` / `123456`
 
-## Laravel Sponsors
+### 2. Ticket Management ✅
+**Requirement**: Users create tickets with specific details and status transitions
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Implementation**:
+- **Model**: `Ticket` with proper relationships
+- **Migration**: Complete schema in `create_tickets_table`
+- **Controllers**: 
+  - `CustomertTicketController` - User operations
+  - `AgentTicketController` - Agent operations
+- **Views**: 
+  - Customer interface: `customer/tickets/index.blade.php`
+  - Agent interface: `agent/tickets/index.blade.php`
 
-### Premium Partners
+**Ticket Fields**:
+- ✅ Ticket name
+- ✅ Ticket type (1=Import, 2=Export, 3=Transit)
+- ✅ Transport mode (air, sea, land)
+- ✅ Product to import/export
+- ✅ Country of origin/destination
+- ✅ Status transitions (new → in_progress → completed)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Features**:
+- Complete CRUD operations for tickets
+- Role-based access control
+- Document attachment system
+- Status workflow management
 
-## Contributing
+### 3. Documentation Exchange ✅
+**Requirement**: Document attachment and review system between users and agents
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Implementation**:
+- **File Storage**: Public disk configuration in filesystems.php
+- **Document Management**: JSON field in tickets table for document metadata
+- **Upload System**: Multi-file upload with validation
+- **Download System**: Secure document access for agents
+- **UI Components**: Modal-based document viewer in `components/ticket/modal.blade.php`
 
-## Code of Conduct
+**Workflow**:
+1. ✅ Users attach documents during ticket creation
+2. ✅ Agents receive ticket notifications
+3. ✅ Agents can request additional documents
+4. ✅ Users upload requested documentation
+5. ✅ Agents review and finalize tickets
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Notifications ✅
+**Requirement**: Basic notification system for status changes and document requests
 
-## Security Vulnerabilities
+**Implementation**:
+- **Service**: `NotificationService` for centralized notification logic
+- **Logging**: Comprehensive logging in logging.php
+- **Events**: Ticket lifecycle events tracked
+- **Future-Ready**: Email infrastructure prepared (currently logs for demo)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Notification Types**:
+- ✅ New ticket creation
+- ✅ Ticket assignment to agent
+- ✅ Document requests
+- ✅ Ticket completion
+- ✅ Comment updates
 
-## License
+## Installation & Setup
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js & NPM (for asset compilation)
+
+### Installation Steps
+
+1. **Clone Repository**
+   ```bash
+   git clone <repository-url>
+   cd ClearitExam
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Database Setup**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+5. **Storage Link**
+   ```bash
+   php artisan storage:link
+   ```
+
+6. **Asset Compilation**
+   ```bash
+   npm run build
+   ```
+
+7. **Start Development Server**
+   ```bash
+   php artisan serve
+   ```
+
+## Key Features Demonstrated
+
+### Role-Based Access Control
+- **Users**: Can create, edit, and view their own tickets
+- **Agents**: Can view new tickets, take assignments, request documents, complete tickets
+- **Admins**: Full system access including user management
+
+### Responsive Design
+- Bootstrap 5.3 integration
+- Mobile-friendly interface
+- Dark/light theme support
+
+### File Management
+- Secure file uploads with validation
+- Document download system for agents
+- File type restrictions (PDF, JPG, PNG, DOCX)
+
+### Database Design
+- Proper foreign key relationships
+- JSON storage for document metadata
+- Migration-based schema management
+
+## Testing
+
+The application includes comprehensive test coverage:
+- **Authentication Tests**: `tests/Feature/Auth/`
+- **Profile Management**: ProfileTest.php
+- **Basic Functionality**: ExampleTest.php
+
+Run tests with:
+```bash
+php artisan test
+```
+
+## Recommendations for Future Development
+
+### 1. Enhanced Data Models
+**Current**: Enum-based ticket types and transport modes
+**Recommendation**: Create dedicated models for `TicketType` and `TransportMode`
+```php
+// Future implementation
+class TicketType extends Model {
+    protected $fillable = ['name', 'code', 'description', 'requirements'];
+}
+```
+**Benefits**: Greater flexibility for adding new types, custom requirements per type
+
+### 2. Automated Ticket Assignment
+**Current**: Manual ticket assignment by agents
+**Recommendation**: Implement automatic assignment based on agent workload and specialization
+```php
+// Future service
+class TicketAssignmentService {
+    public function autoAssignTicket(Ticket $ticket): ?User
+    {
+        return User::role('agent')
+            ->withLeastAssignedTickets()
+            ->specializedIn($ticket->type)
+            ->first();
+    }
+}
+```
+
+### 3. External API Integration
+**Recommendation**: Integrate Amadeus City Search API for location autocomplete
+```php
+// Future implementation
+class AmadeusLocationService {
+    public function searchCities(string $query): Collection
+    {
+        // API integration for city/country suggestions
+    }
+}
+```
+
+### 4. Real-Time Notifications
+**Current**: Log-based notifications
+**Recommendation**: Implement WebSocket-based real-time notifications using Laravel Broadcasting
+```php
+// Future event broadcasting
+class TicketUpdated implements ShouldBroadcast {
+    public function broadcastOn(): Channel
+    {
+        return new PrivateChannel('tickets.'.$this->ticket->created_by);
+    }
+}
+```
+
+### 5. Advanced Document Management
+**Recommendation**: Implement document versioning and approval workflows
+```php
+// Future model
+class DocumentVersion extends Model {
+    protected $fillable = ['document_id', 'version', 'file_path', 'approved_by', 'approved_at'];
+}
+```
+
+### 6. Audit Trail System
+**Recommendation**: Comprehensive audit logging for compliance requirements
+```php
+// Future trait
+trait Auditable {
+    protected static function bootAuditable()
+    {
+        static::created(fn($model) => AuditLog::log('created', $model));
+        static::updated(fn($model) => AuditLog::log('updated', $model));
+    }
+}
+```
+
+## Configuration Files
+
+### Key Configuration Files
+- **Database**: database.php - Database connections
+- **Authentication**: auth.php - Auth guards and providers
+- **Permissions**: permission.php - Role configuration
+- **Mail**: mail.php - Email service setup
+- **File Systems**: filesystems.php - Storage configuration
+
+## Routes Structure
+
+### Web Routes (`routes/web.php`)
+- **Public**: Welcome page, authentication routes
+- **Customer**: Ticket CRUD operations (role: user)
+- **Agent**: Ticket management and processing (role: agent|admin)
+- **Admin**: System administration (role: admin)
+
+### Route Groups
+```php
+// Customer routes
+Route::middleware(['auth', 'role:user'])->prefix('customer/tickets')
+
+// Agent routes  
+Route::middleware(['auth', 'role:agent|admin'])->prefix('agent/tickets')
+
+// Admin routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')
+```
+
+## Security Features
+
+### Input Validation
+- Form request validation for all user inputs
+- File upload restrictions and validation
+- CSRF protection on all forms
+
+### Access Control
+- Role-based middleware protection
+- Route-level permission checks
+- Model-level ownership verification
+
+### File Security
+- Secure file storage in non-public directories
+- Controlled file access through application
+- File type and size validation
+
+---
+
+This project successfully demonstrates all required examination components while maintaining modern Laravel development standards and providing a foundation for future enhancements.

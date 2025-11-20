@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class AgentTicketController extends Controller
 {
+    public function __construct(protected NotificationService $notificationService)
+    {
+    }
+
     public function index()
     {
         $newTickets = Ticket::Where('status', 'new')->get();
@@ -22,7 +27,9 @@ class AgentTicketController extends Controller
         $ticket->status = 'in_progress';
         $ticket->save();
 
-        return redirect()->route('agent.tickets.index')->with('success', 'Ticket taken successfully.');
+        $this->notificationService->notifyTicketAssigned($ticket);
+
+        return redirect()->route('agent.tickets.index')->with('success', 'Ticket taken successfully. Customer has been notified.');
     }
     public function complete($id)
     {
@@ -30,7 +37,9 @@ class AgentTicketController extends Controller
         $ticket->status = 'completed';
         $ticket->save();
 
-        return redirect()->route('agent.tickets.index')->with('success', 'Ticket completed successfully.');
+        $this->notificationService->notifyTicketCompleted($ticket);
+
+        return redirect()->route('agent.tickets.index')->with('success', 'Ticket completed successfully. Customer has been notified.');
     }
 
     public function downloadDocument($ticketId, $documentIndex)
@@ -85,6 +94,8 @@ class AgentTicketController extends Controller
         $ticket->comments = $ticket->comments . $newComment;
         $ticket->save();
 
-        return redirect()->back()->with('success', 'Document request sent to customer.');
+        $this->notificationService->notifyDocumentRequested($ticket, $request->requested_documents);
+
+        return redirect()->back()->with('success', 'Document request sent to customer. Customer has been notified.');
     }   
 }

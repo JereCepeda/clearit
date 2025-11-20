@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Ticket;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -11,6 +12,12 @@ use Illuminate\Http\RedirectResponse;
 
 class CustomertTicketController extends Controller
 {
+
+    public function __construct(protected NotificationService $notificationService)
+    {
+
+    }
+
     public function index(): View
     {
         /** @var User $customer */
@@ -65,10 +72,10 @@ class CustomertTicketController extends Controller
             $ticket->update(['pending_documents' => $documents]);
         }
 
-        // TODO: Send notification to agents
+        $this->notificationService->notifyNewTicket($ticket);
 
         return redirect()->route('customer.tickets.index')
-                        ->with('success', 'Ticket created successfully.');
+                        ->with('success', 'Ticket created successfully. Agents have been notified.');
     }
     public function update(Request $request, $id)
     {
@@ -84,10 +91,12 @@ class CustomertTicketController extends Controller
 
         $ticket = Ticket::findOrFail($id);
         
-        if ($ticket->created_by !== Auth::id() && !Auth::user()->hasRole('admin')) {
+        if ($ticket->created_by !== Auth::id() && !Auth::user()->roles->where('name', 'admin')->count()) {
             return redirect()->route('customer.tickets.index')
                         ->with('error', 'Permission denied, you do not have access to edit this ticket.');
         }
+
+        $oldComments = $ticket->comments;
 
         $ticket->update([
             'name' => $request->name,
@@ -111,7 +120,9 @@ class CustomertTicketController extends Controller
             $ticket->update(['pending_documents' => $existingDocs]);
         }
 
+        $this->notificationService->notifyTicketCommentUpdate($ticket, $oldComments, $request->comments);
+
         return redirect()->route('customer.tickets.index')
-                        ->with('success', 'Ticket updated successfully.');
+                        ->with('success', 'Ticket updated successfully. Relevant parties have been notified.');
     }
 }

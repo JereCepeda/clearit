@@ -6,18 +6,47 @@ This is a complete Laravel-based ticket management system for import/export clea
 
 ## 🚀 Quick Start for Evaluation
 
-### Option 1: Docker Setup (Recommended)
+### Option 1: Docker Setup (Recommended - Fully Automated)
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd ClearitExam
 
 # Start with Docker (no local PHP/MySQL needed)
+# This will take a few minutes on first run - installs ALL dependencies automatically:
+# - Laravel Breeze authentication
+# - Spatie Permissions package
+# - Node.js dependencies (npm install)
+# - Database migrations and seeders
+# - Asset compilation (npm run build)
 docker compose -f docker-compose.simple.yml up -d
 
-# Access the application
+# Monitor the complete setup process
+docker compose -f docker-compose.simple.yml logs -f php
+
+# Access the application (wait for "Laravel setup completed successfully!")
 # Main App: http://localhost:8080
 # phpMyAdmin: http://localhost:8081
+
+# If you encounter issues, rebuild completely:
+docker compose -f docker-compose.simple.yml down -v
+docker compose -f docker-compose.simple.yml up -d
+```
+
+### Docker Manual Commands (if needed)
+```bash
+# Access PHP container for manual commands
+docker exec -it clearit_php bash
+
+# Inside container - manual setup commands:
+composer install                    # Install Laravel dependencies
+npm install                         # Install Node.js dependencies  
+npm run build                       # Build assets
+php artisan migrate --seed          # Run migrations and seeders
+php artisan storage:link            # Create storage link
+
+# Development mode (for active development)
+npm run dev                         # Start Vite dev server (if needed)
 ```
 
 ### Option 2: Local Development Setup
@@ -105,6 +134,26 @@ DB_CONNECTION=sqlite
 - **MySQL**: Port 3307 (to avoid XAMPP conflicts)
 - **Application**: Port 8080
 - **phpMyAdmin**: Port 8081
+- **Health Checks**: Implemented for reliable container startup
+- **Auto-setup**: Complete Laravel environment automated
+
+**Automatically Installed Dependencies:**
+- ✅ **PHP Extensions**: PDO MySQL, GD, Zip
+- ✅ **Laravel Breeze**: Authentication scaffolding
+- ✅ **Spatie Permissions**: Role-based access control
+- ✅ **Node.js 18.x**: For asset compilation
+- ✅ **NPM Dependencies**: All frontend packages
+- ✅ **Database**: Migrations + seeders with demo data
+- ✅ **Assets**: Compiled CSS/JS (npm run build)
+- ✅ **Storage**: Symbolic links configured
+
+**Fixed Issues:**
+- ✅ Container dependency management with health checks
+- ✅ Proper database connection waiting
+- ✅ Automatic Laravel environment configuration
+- ✅ Complete dependency installation (dev + production)
+- ✅ Asset compilation and permission handling
+- ✅ Retry logic for database migrations
 
 ## 🛠️ Development Features
 

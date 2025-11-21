@@ -1,7 +1,60 @@
-Collecting workspace information# ClearIT MVP - Technical Examination
+Collecting workspace information# ClearIT MVP - Technical Examination (Docker Fixed)
 
 ## Overview
 This project is a Minimum Viable Product (MVP) developed for the **Clearit PHP Technical Examination**. It demonstrates a complete ticket management system for import/export clearance operations using modern Laravel development practices.
+
+## 🚀 Quick Setup with Docker (Complete Automation)
+
+```bash
+# Clone and start with Docker (all dependencies included)
+git clone <repository-url>
+cd ClearitExam
+
+# Start services - this automatically installs:
+# ✅ Laravel Breeze (authentication)
+# ✅ Spatie Permissions (roles)
+# ✅ Node.js dependencies
+# ✅ Database migrations + seeders
+# ✅ Asset compilation (Vite)
+docker compose -f docker-compose.simple.yml up -d
+
+# Monitor complete setup (wait for "Laravel setup completed successfully!")
+docker compose -f docker-compose.simple.yml logs -f php
+
+# Access application
+# Main App: http://localhost:8080
+# phpMyAdmin: http://localhost:8081
+```
+
+## 🛠️ Manual Docker Commands (Optional)
+
+```bash
+# Access PHP container for manual operations
+docker exec -it clearit_php bash
+
+# Manual dependency management inside container:
+composer install               # Laravel packages
+npm install                   # Node.js packages
+npm run build                # Compile assets
+npm run dev                  # Development mode (watch)
+php artisan migrate:fresh --seed  # Reset database
+```
+
+## 🔧 Docker Features & Fixes Applied
+
+- ✅ **Complete Automation**: Laravel Breeze, Spatie Permissions, all dependencies
+- ✅ **Error 502 Fixed**: Proper container dependencies and health checks
+- ✅ **Database Setup**: Migrations, seeders, and demo data automatically loaded
+- ✅ **Asset Compilation**: Vite build process integrated (npm run build)
+- ✅ **Node.js Ready**: Full development environment with NPM
+- ✅ **Storage Links**: File upload system properly configured
+- ✅ **Permission Management**: Proper file permissions handling
+
+## 👥 Demo Accounts
+
+- **Customer**: `user@clearit.com` / `123456`
+- **Agent**: `agent@clearit.com` / `123456`
+- **Admin**: `admin@clearit.com` / `123456`
 
 ## System Architecture
 
